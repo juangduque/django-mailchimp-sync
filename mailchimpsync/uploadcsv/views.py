@@ -1,6 +1,14 @@
 from django.shortcuts import render
 from .forms import UploadNewFileForm
 import csv
+import mailchimp_marketing as MailchimpMarketing
+from mailchimp_marketing.api_client import ApiClientError
+
+client = MailchimpMarketing.Client()
+client.set_config({
+    "api_key": "9c514b6cead3fca2b6e7078a39899139-us21",
+    "server": "us21"
+})
 
 def upload_csv(request):
     if request.method == 'POST':
@@ -18,3 +26,16 @@ def upload_csv(request):
     else:
         form = UploadNewFileForm()
     return render(request, 'upload.html', {'form': form})
+
+def connection_check(request):
+    is_error = False
+    response = None
+    try:
+        response = client.ping.get()
+    except ApiClientError as error:
+        print("An exception occurred: {}".format(error.text))
+        is_error = True
+    return render(request, 'connection_check.html', {
+        'response': response,
+        'is_error': is_error,
+    })

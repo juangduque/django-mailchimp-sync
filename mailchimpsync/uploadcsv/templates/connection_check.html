@@ -1,0 +1,7 @@
+<div>
+	{% if is_error %}
+		<h1>Oops! It seems that something went wrong</h1>
+	{% else %}
+		<h1>{{ response.health_status }}</h1>
+	{% endif %}
+</div>
