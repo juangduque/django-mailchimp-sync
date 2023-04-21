@@ -6,5 +6,8 @@
 <div class="general-section">
     <img src="{% static 'icons/bad_sign.png' %}" alt="error sign">
     <h3>Check the log in the terminal to have more details</h3>
+    {% if request.session.user_sync_counter > 0 %}
+        <h4>You have partially synced {{ request.session.user_sync_counter }} contacts, check into mailchimp list</h4>
+    {% endif %}
 </div>
 {% endblock %}

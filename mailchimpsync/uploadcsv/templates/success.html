@@ -5,7 +5,10 @@
 <h1 class="section__title">CSV Upload Success!</h1>
 <div class="general-section">
     <img src="{% static 'icons/good_sign.png' %}" alt="success sign">
-    <h4>Your CSV file has been successfully uploaded and saved.</h4>
+    <h4>Your contacts have been successfully synced and saved.</h4>
+    {% if request.session.user_sync_counter > 0 %}
+        <h4>You have synced {{ request.session.user_sync_counter }} contacts</h4>
+    {% endif %}
     <button class="btn btn-success">
         <a class="custom-link" href="{% url 'upload_csv' %}">Upload Another CSV</a>
     </button>

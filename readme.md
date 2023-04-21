@@ -130,3 +130,15 @@ fields_to_data = {
     "Today visitors Attribute change timestamp": csv_file_headers[7],
     "Phone change timestamp": csv_file_headers[15],
 }
+
+An error occurred: {"title":"Member Exists","status":400,"detail":"jturne@socialgoodsoftware.com is already a list member. Use PUT to insert or update list members.","instance":"85abe27a-625c-5aec-5077-1dd492c41f98"}
+
+An error occurred: {"title":"Member Exists","status":400,"detail":"rick@socialgoodsoftware.com is already a list member. Use PUT to insert or update list members.","instance":"7f15febe-615f-be8b-9d2b-3e83a243c5f0"}
+
+An error occurred: {"type":"https://mailchimp.com/developer/marketing/docs/errors/","title":"Invalid Resource","status":400,"detail":"jturne@socialgoodsoftware.com has signed up to a lot of lists very recently; we're not allowing more signups for now","instance":"cd25c7ac-d736-0ab1-78eb-e819d764e827"}
+
+An error occurred when checking the existence of contact: {"type":"https://mailchimp.com/developer/marketing/docs/errors/","title":"Resource Not Found","status":404,"detail":"The requested resource could not be found.","instance":"523ddb0e-b9c6-6ebc-a6a2-b69ef91861ce"}
+
+An error occurred when checking the existence of contact: {"type":"https://mailchimp.com/developer/marketing/docs/errors/","title":"Resource Not Found","status":404,"detail":"The requested resource could not be found.","instance":"1aea85af-2f2c-a494-fc83-be9683d157c9"}
+
+It's also worth noting that repeatedly attempting to add the same email address in a short period of time may trigger Mailchimp's abuse prevention measures and result in your account being suspended or terminated.

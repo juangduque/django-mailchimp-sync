@@ -5,12 +5,13 @@ from mailchimp_marketing.api_client import ApiClientError
 from io import TextIOWrapper
 from .forms import UploadNewFileForm
 from .utils import get_merge_fields_names, map_csv_row_to_merge_fields, map_to_member_fields
-import io, csv, requests
+import io, csv, requests, json
 
 
 API_KEY = "9c514b6cead3fca2b6e7078a39899139-us21"
 SERVER_PREFIX = "us21"
 LIST_ID = "c71779671d"
+DEBUG = True
 
 client = MailchimpMarketing.Client()
 client.set_config({
@@ -20,35 +21,51 @@ client.set_config({
 
 def upload_csv(request):
     if request.method == 'POST' and request.FILES['csv_file']:
-        try:
-            csv_file = request.FILES['csv_file']
-            extension = csv_file.name.split('.')[-1] # Get the file extension
-            if extension.lower() != "csv":
-                return redirect('file_format_error') # Return an error if the file is not a CSV
-            csv_file_wrapper = TextIOWrapper(csv_file, encoding='utf-8')            
-            csv_reader = csv.DictReader(csv_file_wrapper) # Use Python's built-in CSV library to read the file
-            headers = csv_reader.fieldnames
-            email_header = ""
-            # Set a default email header
-            if "Email Addresses\\Email address" in headers:
-                email_header = "Email Addresses\\Email address"
+        csv_file = request.FILES['csv_file']
+        extension = csv_file.name.split('.')[-1] # Get the file extension
+        if extension.lower() != "csv":
+            return redirect('file_format_error') # Return an error if the file is not a CSV
+        csv_file_wrapper = TextIOWrapper(csv_file, encoding='utf-8')            
+        csv_reader = csv.DictReader(csv_file_wrapper) # Use Python's built-in CSV library to read the file
+        headers = csv_reader.fieldnames
+        email_header = ""
+        # Set a default email header
+        if "Email Addresses\\Email address" in headers:
+            email_header = "Email Addresses\\Email address"
+        else:
+            email_header = "email" # Generic email header
+        user_sync_counter = 0
+        for row in csv_reader:
+            email = row.get(email_header)
+            merge_fields = map_csv_row_to_merge_fields(row)
+            if DEBUG:
+                print("merge_fields: ", user_sync_counter)
+                print(json.dumps(merge_fields, indent=4, sort_keys=True))
+            # Check if the member is already subscribed
+            try:
+                response = client.lists.get_list_member(LIST_ID, email)
+            except ApiClientError as e:
+                print("An error occurred when checking the existence of contact: {}".format(e.text))
+                return redirect('error')            
+            if response.get("status") == "subscribed":
+                continue
             else:
-                email_header = "email" # Generic email header
-            for row in csv_reader:
-                email = row.get(email_header)
-                merge_fields = map_csv_row_to_merge_fields(row)
-                client.lists.add_list_member(
-                    LIST_ID,
-                    {
-                        "email_address": email,
-                        "status": "subscribed",
-                        "merge_fields": merge_fields
-                    }
-                )
-        except ApiClientError as e:
-            # Handle any errors that occur
-            print("An error occurred: {}".format(e.text))
-            return redirect('error')
+                # Add the member to the list 
+                try:
+                    client.lists.add_list_member(
+                        LIST_ID,
+                        {
+                            "email_address": email,
+                            "status": "subscribed",
+                            "merge_fields": merge_fields
+                        }
+                    )
+                    user_sync_counter += 1
+                    request.session['user_sync_counter'] = user_sync_counter
+                except ApiClientError as e:
+                    # Handle any errors that occur
+                    print("An error occurred when adding a contact to the list: {}".format(e.text))
+                    return redirect('error')
         return redirect('success')
     else:
         form = UploadNewFileForm()

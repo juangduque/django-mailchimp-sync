@@ -1,19 +1,21 @@
-def map_csv_row_to_merge_fields(csv_file_headers):
+def map_csv_row_to_merge_fields(row):
     return {
-    "EMAIL": csv_file_headers["Email Addresses\\Email address"],
-    "FNAME": csv_file_headers["First name"],
-    "LNAME": csv_file_headers["Last/Organization/Group/Household name"],
-    "MMERGE15": csv_file_headers["Addresses\\Address line 1"] + " " + csv_file_headers["Addresses\\Address line 2"] + " " + csv_file_headers["Addresses\\City"] + " " + csv_file_headers["Addresses\\State abbreviation"] + " " + csv_file_headers["Addresses\\ZIP"] + " " + csv_file_headers["Addresses\\Country abbreviation"],
-    "PHONE": csv_file_headers["Phones\\Number"],
-    "MMERGE7": csv_file_headers["Addresses\\Country abbreviation"],
-    "MMERGE8": "Addresses\\State abbreviation",
-    "MMERGE9": csv_file_headers["Addresses\\ZIP"],
-    "MMERGE10": csv_file_headers["System record ID"],
-    "MMERGE11": csv_file_headers["Date changed"],
-    "MMERGE12": csv_file_headers["Email Addresses\\Date changed"],
-    "MMERGE13": csv_file_headers["Todays Visitors Attribute\\Value"],
-    "MMERGE14": csv_file_headers["Todays Visitors Attribute\\Date changed"],
-    "MMERGE16": csv_file_headers["Phones\\Date changed"],
+    "EMAIL": row["Email Addresses\\Email address"],
+    "FNAME": row["First name"],
+    "LNAME": row["Last/Organization/Group/Household name"],
+    "MMERGE15": row["Addresses\\Address line 1"] + " " + row["Addresses\\Address line 2"] + " " + row["Addresses\\City"] + " " + row["Addresses\\State abbreviation"] + " " + row["Addresses\\ZIP"] + " " + row["Addresses\\Country abbreviation"],
+    "PHONE": row["Phones\\Number"],
+    "ADDRESS": row["Addresses\\Address line 1"] + " " + row["Addresses\\Address line 2"] + " " + row["Addresses\\City"] + " " + row["Addresses\\State abbreviation"] + " " + row["Addresses\\ZIP"] + " " + row["Addresses\\Country abbreviation"],
+    "PHONE": row["Phones\\Number"],
+    "MMERGE7": row["Addresses\\Country abbreviation"],
+    "MMERGE8": row["Addresses\\State abbreviation"],
+    "MMERGE9": row["Addresses\\ZIP"],
+    "MMERGE10": row["System record ID"],
+    "MMERGE11": row["Date changed"],
+    "MMERGE12": row["Email Addresses\\Date changed"],
+    "MMERGE13": row["Todays Visitors Attribute\\Value"],
+    "MMERGE14": row["Todays Visitors Attribute\\Date changed"],
+    "MMERGE16": row["Phones\\Date changed"],
     }
 
 def get_merge_fields_names():
