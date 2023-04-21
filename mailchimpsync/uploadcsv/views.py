@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from .forms import UploadNewFileForm
 import mailchimp_marketing as MailchimpMarketing
 from mailchimp_marketing.api_client import ApiClientError
 from io import TextIOWrapper
+import io
 import csv
+import requests
 
 API_KEY = "9c514b6cead3fca2b6e7078a39899139-us21"
 SERVER_PREFIX = "us21"
@@ -15,6 +18,13 @@ client.set_config({
     "server": SERVER_PREFIX
 })
 
+def get_merge_fields_names():
+    merge_fields = client.lists.get_list_merge_fields(LIST_ID)
+    merge_fields_names = []
+    for merge_field in merge_fields['merge_fields']:
+        merge_fields_names.append(merge_field['name'])
+    return merge_fields_names
+
 def upload_csv(request):
     if request.method == 'POST' and request.FILES['csv_file']:
         csv_file = request.FILES['csv_file']
@@ -22,7 +32,7 @@ def upload_csv(request):
         # Use Python's built-in CSV library to read the file
         csv_reader = csv.DictReader(csv_file_wrapper)
         headers = csv_reader.fieldnames
-        email_header = "email"
+        email_header = "Email Address"
         for row in csv_reader:
             email = row.get(email_header)
             merge_fields = {}
@@ -38,8 +48,6 @@ def upload_csv(request):
                         "merge_fields": merge_fields
                     }
                 )
-                print("response:")
-                print(response)
             except ApiClientError as e:
                 # Handle any errors that occur
                 print("An error occurred: {}".format(e.text))
@@ -48,6 +56,45 @@ def upload_csv(request):
     else:
         form = UploadNewFileForm()
     return render(request, 'upload.html', {'form': form})
+
+def download_list(request):
+    try:
+        url = f'https://{SERVER_PREFIX}.api.mailchimp.com/3.0/lists/{LIST_ID}/members'
+        headers = {
+            'Authorization': f'apikey {API_KEY}',
+            'Content-Type': 'application/json'
+        }
+        params = {
+            'fields': 'members.email_address,members.merge_fields',
+            'count': 1000
+        }
+
+        response = requests.get(url, headers=headers, params=params)
+
+        # Check if the response was successful
+        if response.status_code == 200:
+            # Convert the response data to CSV format
+            merge_fields = get_merge_fields_names()
+            csv_data = io.StringIO()
+            writer = csv.writer(csv_data)
+            writer.writerow(merge_fields) # replace with your merge field names
+            for member in response.json()['members']:
+                row = [member['email_address'], member['merge_fields']['FNAME'], member['merge_fields']['LNAME']]  # replace with your merge field data
+                writer.writerow(row)
+
+            # Create an HTTP response with the CSV data
+            response = HttpResponse(csv_data.getvalue(), content_type='text/csv')
+            response['Content-Disposition'] = 'attachment; filename="exported-contacts.csv"'
+            return response
+        else:
+            return HttpResponse('Error:', response.status_code, response.text)
+    except ApiClientError as e:
+        # Handle any errors that occur
+        print("An error occurred: {}".format(e.text))
+        return redirect('upload_error')
+    
+def list_download(request):
+    return render(request, 'list_download.html', {})
 
 def connection_check(request):
     is_error = False
@@ -68,5 +115,5 @@ def connection_check(request):
 def success(request):
     return render(request, 'success.html')
 
-def upload_error(request):
-    return render(request, 'error_upload.html')
+def error(request):
+    return render(request, 'error.html')
