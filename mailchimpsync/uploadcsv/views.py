@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .forms import UploadNewFileForm
 import mailchimp_marketing as MailchimpMarketing
 from mailchimp_marketing.api_client import ApiClientError
 from io import TextIOWrapper
-import io, csv, requests, os
+from .forms import UploadNewFileForm
+from .utils import get_merge_fields_names, map_csv_row_to_merge_fields, map_to_member_fields
+import io, csv, requests
 
 
 API_KEY = "9c514b6cead3fca2b6e7078a39899139-us21"
@@ -16,31 +17,6 @@ client.set_config({
     "api_key": API_KEY,
     "server": SERVER_PREFIX
 })
-
-def map_csv_row_to_merge_fields(csv_file_headers):
-    return {
-    "EMAIL": csv_file_headers["Email Addresses\\Email address"],
-    "FNAME": csv_file_headers["First name"],
-    "LNAME": csv_file_headers["Last/Organization/Group/Household name"],
-    "MMERGE15": csv_file_headers["Addresses\\Address line 1"] + " " + csv_file_headers["Addresses\\Address line 2"] + " " + csv_file_headers["Addresses\\City"] + " " + csv_file_headers["Addresses\\State abbreviation"] + " " + csv_file_headers["Addresses\\ZIP"] + " " + csv_file_headers["Addresses\\Country abbreviation"],
-    "PHONE": csv_file_headers["Phones\\Number"],
-    "MMERGE7": csv_file_headers["Addresses\\Country abbreviation"],
-    "MMERGE8": "Addresses\\State abbreviation",
-    "MMERGE9": csv_file_headers["Addresses\\ZIP"],
-    "MMERGE10": csv_file_headers["System record ID"],
-    "MMERGE11": csv_file_headers["Date changed"],
-    "MMERGE12": csv_file_headers["Email Addresses\\Date changed"],
-    "MMERGE13": csv_file_headers["Todays Visitors Attribute\\Value"],
-    "MMERGE14": csv_file_headers["Todays Visitors Attribute\\Date changed"],
-    "MMERGE16": csv_file_headers["Phones\\Date changed"],
-    }
-
-def get_merge_fields_names():
-    merge_fields = client.lists.get_list_merge_fields(LIST_ID)
-    merge_fields_names = []
-    for merge_field in merge_fields['merge_fields']:
-        merge_fields_names.append(merge_field['name'])
-    return merge_fields_names
 
 def upload_csv(request):
     if request.method == 'POST' and request.FILES['csv_file']:
@@ -100,7 +76,7 @@ def download_list(request):
             writer = csv.writer(csv_data)
             writer.writerow(merge_fields) # replace with your merge field names
             for member in response.json()['members']:
-                row = [member['email_address'], member['merge_fields']['FNAME'], member['merge_fields']['LNAME']]  # replace with your merge field data
+                row = map_to_member_fields(member) # replace with your merge field data
                 writer.writerow(row)
 
             # Create an HTTP response with the CSV data

@@ -1,3 +1,6 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
 <div>
 	{% if is_error %}
 		<h1>Oops! It seems that something went wrong</h1>
@@ -5,3 +8,4 @@
 		<h1>{{ response.health_status }}</h1>
 	{% endif %}
 </div>
+{% endblock %}
