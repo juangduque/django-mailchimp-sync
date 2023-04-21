@@ -8,6 +8,7 @@ import io
 import csv
 import requests
 import json
+from .utils import upload_csv
 
 API_KEY = "9c514b6cead3fca2b6e7078a39899139-us21"
 SERVER_PREFIX = "us21"
@@ -19,60 +20,23 @@ client.set_config({
     "server": SERVER_PREFIX
 })
 
-mailchimp_name_tag_map = {
-    "Email Address": "EMAIL",
-    "First Name": "FNAME",
-    "Last Name": "LNAME",
-    "Full address": "MMERGE15",
-    "Address - Combined": "ADDRESS",
-    "Phone Number": "PHONE",
-    "phone creation timestamp": "MMERGE6",
-    "Country": "MMERGE7",
-    "State abreviation": "MMERGE8",
-    "ZIP code": "MMERGE9",
-    "System record ID": "MMERGE10",
-    "Date changed": "MMERGE11",
-    "Email change timestamp": "MMERGE12",
-    "Today visitors attribute": "MMERGE13",
-    "Today visitors Attribute change timestamp": "MMERGE14",
-    "Phone change timestamp": "MMERGE16",
-}
-
-csv_file_headers = [
-    'First name', #0
-    'Last/Organization/Group/Household name', #1
-    'System record ID', #2
-    'Date changed', #3
-    'Email Addresses\\Email address', #4
-    'Email Addresses\\Date changed', #5
-    'Todays Visitors Attribute\\Value', #6
-    'Todays Visitors Attribute\\Date changed', #7
-    'Addresses\\Address line 1', #8
-    'Addresses\\Address line 2', #9
-    'Addresses\\City', #10
-    'Addresses\\ZIP', #11
-    'Addresses\\State abbreviation', #12
-    'Addresses\\Country abbreviation', #13
-    'Phones\\Number', #14
-    'Phones\\Date changed' #15
-]
-
-fields_to_data = {
-    "Email Address": csv_file_headers[4],
-    "First Name": csv_file_headers[0],
-    "Last Name": csv_file_headers[1],
-    "Full address": csv_file_headers[8] + " " + csv_file_headers[9] + " " + csv_file_headers[10] + " " + csv_file_headers[12] + " " + csv_file_headers[11] + " " + csv_file_headers[13],
-    "Phone Number": csv_file_headers[14],
-    "Country": csv_file_headers[13],
-    "State abreviation": csv_file_headers[12],
-    "ZIP code": csv_file_headers[11],
-    "System record ID": csv_file_headers[2],
-    "Date changed": csv_file_headers[3],
-    "Email change timestamp": csv_file_headers[5],
-    "Today visitors attribute": csv_file_headers[6],
-    "Today visitors Attribute change timestamp": csv_file_headers[7],
-    "Phone change timestamp": csv_file_headers[15],
-}
+def map_csv_row_to_merge_fields(csv_file_headers):
+    return {
+    "EMAIL": csv_file_headers["Email Addresses\\Email address"],
+    "FNAME": csv_file_headers["First name"],
+    "LNAME": csv_file_headers["Last/Organization/Group/Household name"],
+    "MMERGE15": csv_file_headers["Addresses\\Address line 1"] + " " + csv_file_headers["Addresses\\Address line 2"] + " " + csv_file_headers["Addresses\\City"] + " " + csv_file_headers["Addresses\\State abbreviation"] + " " + csv_file_headers["Addresses\\ZIP"] + " " + csv_file_headers["Addresses\\Country abbreviation"],
+    "PHONE": csv_file_headers["Phones\\Number"],
+    "MMERGE7": csv_file_headers["Addresses\\Country abbreviation"],
+    "MMERGE8": "Addresses\\State abbreviation",
+    "MMERGE9": csv_file_headers["Addresses\\ZIP"],
+    "MMERGE10": csv_file_headers["System record ID"],
+    "MMERGE11": csv_file_headers["Date changed"],
+    "MMERGE12": csv_file_headers["Email Addresses\\Date changed"],
+    "MMERGE13": csv_file_headers["Todays Visitors Attribute\\Value"],
+    "MMERGE14": csv_file_headers["Todays Visitors Attribute\\Date changed"],
+    "MMERGE16": csv_file_headers["Phones\\Date changed"],
+    }
 
 def get_merge_fields_names():
     merge_fields = client.lists.get_list_merge_fields(LIST_ID)
@@ -88,32 +52,30 @@ def upload_csv(request):
         # Use Python's built-in CSV library to read the file
         csv_reader = csv.DictReader(csv_file_wrapper)
         headers = csv_reader.fieldnames
-        email_header = "Email Address"
+        email_header = ""
+        # Set a default email header
+        if "Email Addresses\\Email address" in headers:
+            email_header = "Email Addresses\\Email address"
+        else:
+            email_header = "email" # Generic email header
         for row in csv_reader:
             email = row.get(email_header)
-            # merge_fields = {}
-            # # For each row, extract the necessary fields (e.g. email, first name, last name)
-            # for header in headers:
-            #     merge_fields[header] = row.get(header)
             try:
-                response = client.lists.add_list_member(
+                merge_fields = map_csv_row_to_merge_fields(row)
+                client.lists.add_list_member(
                     LIST_ID,
                     {
                         "email_address": email,
                         "status": "subscribed",
-                        "merge_fields": {
-                            "FNAME": row.get("First Name"),
-                            "LNAME": row.get("Last Name")
-                        }
+                        "merge_fields": merge_fields
                     }
                 )
             except ApiClientError as e:
                 # Handle any errors that occur
                 print("An error occurred: {}".format(e.text))
-                return redirect('upload_error')
+                return redirect('error')
         return redirect('success')
     else:
-        print(get_merge_fields_names())
         form = UploadNewFileForm()
     return render(request, 'upload.html', {'form': form})
 
