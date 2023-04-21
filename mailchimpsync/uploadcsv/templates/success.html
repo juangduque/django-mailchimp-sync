@@ -1,7 +1,13 @@
 {% extends 'layout/base.html' %}
+{% load static%}
 
 {% block content %}
-<h1>CSV Upload Success!</h1>
-<p>Your CSV file has been successfully uploaded and saved.</p>
-<a href="{% url 'upload_csv' %}">Upload Another CSV</a>
+<h1 class="section__title">CSV Upload Success!</h1>
+<div class="general-section">
+    <img src="{% static 'icons/good_sign.png' %}" alt="success sign">
+    <h4>Your CSV file has been successfully uploaded and saved.</h4>
+    <button class="btn btn-success">
+        <a class="custom-link" href="{% url 'upload_csv' %}">Upload Another CSV</a>
+    </button>
+</div>
 {% endblock %}

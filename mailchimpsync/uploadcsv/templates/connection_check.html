@@ -1,11 +1,19 @@
 {% extends 'layout/base.html' %}
+{% load static%}
 
 {% block content %}
 <div>
 	{% if is_error %}
-		<h1>Oops! It seems that something went wrong</h1>
+		<h1 class="section__title">Oops! It seems that something went wrong</h1>
+		<div class="general-section">
+			<img src="{% static 'icons/bad_sign.png' %}" alt="">
+			<h3>Verify the logs in the terminal</h3>
+		</div>
 	{% else %}
-		<h1>{{ response.health_status }}</h1>
+		<h1 class="section__title">{{ response.health_status }}</h1>
+		<div class="general-section">
+			<img id="big-image" src="{% static 'icons/mailchimp_logo.png' %}" alt="mailchimp logo">
+		</div>
 	{% endif %}
 </div>
 {% endblock %}

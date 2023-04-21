@@ -1,9 +1,11 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-<div class="container">
-    <h1>Download List</h1>
-    <p>Click the button below to download your Mailchimp list as a CSV file.</p>
-    <a href="{% url 'download_list' %}" class="btn btn-primary">Download List</a>
+<h2 class="section__title">Download List</h2>
+<div class="section__container">
+    <div class="download__container">
+        <p>Click the button below to download your Mailchimp list as a CSV file.</p>
+        <a href="{% url 'download_list' %}" class="btn btn-primary">Download List</a>
+    </div>
 </div>
 {% endblock %}

@@ -1,6 +1,10 @@
 {% extends 'layout/base.html' %}
+{% load static%}
 
 {% block content %}
-<h1>An error has occurred</h1>
-<h2>Check the log to have more details</h2>
+<h1 class="section__title">An error has occurred</h1>
+<div class="general-section">
+    <img src="{% static 'icons/bad_sign.png' %}" alt="error sign">
+    <h3>Check the log in the terminal to have more details</h3>
+</div>
 {% endblock %}

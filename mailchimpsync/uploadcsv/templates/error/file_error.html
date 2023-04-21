@@ -1,7 +1,13 @@
 {% extends 'layout/base.html' %}
+{% load static%}
 
 {% block content %}
-<h1>The file that you are trying to upload is not a .csv file</h1>
-
-<a href="{% url 'upload_csv' %}">Upload Another CSV</a>
+<h1 class="section__title">The file that you are trying to upload is not a .csv file</h1>
+<div class="general-section">
+    <img src="{% static 'icons/bad_file.png' %}" alt="bad file format">
+    <h3>The file that you are trying to upload is not a .csv file</h3>
+    <button class="btn btn-warning">
+        <a class="custom-link" href="{% url 'upload_csv' %}">Upload Another CSV</a>
+    </button>
+</div>
 {% endblock %}

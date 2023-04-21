@@ -109,6 +109,9 @@ def connection_check(request):
         'is_error': is_error,
     })
 
+def index(request):
+    return render(request, 'index.html')
+
 def success(request):
     return render(request, 'success.html')
 

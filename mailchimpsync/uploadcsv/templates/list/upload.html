@@ -3,9 +3,14 @@
 
 <!-- upload.html -->
 {% block content %}
-<form method="POST" enctype="multipart/form-data" class="formulario">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Upload CSV</button>
-</form>
+<h2 class="section__title">Upload your CSV file with your contacts</h2>
+<div class="section__container">
+  <form method="POST" enctype="multipart/form-data" class="upload_form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="submit-btn__container">
+      <button class="btn btn-primary" type="submit">Upload CSV</button>
+    </div>
+  </form>
+</div>
 {% endblock %}
