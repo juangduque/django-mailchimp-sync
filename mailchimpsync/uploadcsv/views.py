@@ -4,11 +4,8 @@ from .forms import UploadNewFileForm
 import mailchimp_marketing as MailchimpMarketing
 from mailchimp_marketing.api_client import ApiClientError
 from io import TextIOWrapper
-import io
-import csv
-import requests
-import json
-from .utils import upload_csv
+import io, csv, requests, os
+
 
 API_KEY = "9c514b6cead3fca2b6e7078a39899139-us21"
 SERVER_PREFIX = "us21"
@@ -47,20 +44,22 @@ def get_merge_fields_names():
 
 def upload_csv(request):
     if request.method == 'POST' and request.FILES['csv_file']:
-        csv_file = request.FILES['csv_file']
-        csv_file_wrapper = TextIOWrapper(csv_file, encoding='utf-8')
-        # Use Python's built-in CSV library to read the file
-        csv_reader = csv.DictReader(csv_file_wrapper)
-        headers = csv_reader.fieldnames
-        email_header = ""
-        # Set a default email header
-        if "Email Addresses\\Email address" in headers:
-            email_header = "Email Addresses\\Email address"
-        else:
-            email_header = "email" # Generic email header
-        for row in csv_reader:
-            email = row.get(email_header)
-            try:
+        try:
+            csv_file = request.FILES['csv_file']
+            extension = csv_file.name.split('.')[-1] # Get the file extension
+            if extension.lower() != "csv":
+                return redirect('file_format_error') # Return an error if the file is not a CSV
+            csv_file_wrapper = TextIOWrapper(csv_file, encoding='utf-8')            
+            csv_reader = csv.DictReader(csv_file_wrapper) # Use Python's built-in CSV library to read the file
+            headers = csv_reader.fieldnames
+            email_header = ""
+            # Set a default email header
+            if "Email Addresses\\Email address" in headers:
+                email_header = "Email Addresses\\Email address"
+            else:
+                email_header = "email" # Generic email header
+            for row in csv_reader:
+                email = row.get(email_header)
                 merge_fields = map_csv_row_to_merge_fields(row)
                 client.lists.add_list_member(
                     LIST_ID,
@@ -70,14 +69,14 @@ def upload_csv(request):
                         "merge_fields": merge_fields
                     }
                 )
-            except ApiClientError as e:
-                # Handle any errors that occur
-                print("An error occurred: {}".format(e.text))
-                return redirect('error')
+        except ApiClientError as e:
+            # Handle any errors that occur
+            print("An error occurred: {}".format(e.text))
+            return redirect('error')
         return redirect('success')
     else:
         form = UploadNewFileForm()
-    return render(request, 'upload.html', {'form': form})
+    return render(request, 'list/upload.html', {'form': form})
 
 def download_list(request):
     try:
@@ -116,7 +115,7 @@ def download_list(request):
         return redirect('upload_error')
     
 def list_download(request):
-    return render(request, 'list_download.html', {})
+    return render(request, 'list/download.html', {})
 
 def connection_check(request):
     is_error = False
@@ -138,4 +137,7 @@ def success(request):
     return render(request, 'success.html')
 
 def error(request):
-    return render(request, 'error.html')
+    return render(request, 'error/error.html')
+
+def file_format_error(request):
+    return render(request, 'error/file_error.html')
