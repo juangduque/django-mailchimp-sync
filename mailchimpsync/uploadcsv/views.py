@@ -7,6 +7,7 @@ from io import TextIOWrapper
 import io
 import csv
 import requests
+import json
 
 API_KEY = "9c514b6cead3fca2b6e7078a39899139-us21"
 SERVER_PREFIX = "us21"
@@ -17,6 +18,61 @@ client.set_config({
     "api_key": API_KEY,
     "server": SERVER_PREFIX
 })
+
+mailchimp_name_tag_map = {
+    "Email Address": "EMAIL",
+    "First Name": "FNAME",
+    "Last Name": "LNAME",
+    "Full address": "MMERGE15",
+    "Address - Combined": "ADDRESS",
+    "Phone Number": "PHONE",
+    "phone creation timestamp": "MMERGE6",
+    "Country": "MMERGE7",
+    "State abreviation": "MMERGE8",
+    "ZIP code": "MMERGE9",
+    "System record ID": "MMERGE10",
+    "Date changed": "MMERGE11",
+    "Email change timestamp": "MMERGE12",
+    "Today visitors attribute": "MMERGE13",
+    "Today visitors Attribute change timestamp": "MMERGE14",
+    "Phone change timestamp": "MMERGE16",
+}
+
+csv_file_headers = [
+    'First name', #0
+    'Last/Organization/Group/Household name', #1
+    'System record ID', #2
+    'Date changed', #3
+    'Email Addresses\\Email address', #4
+    'Email Addresses\\Date changed', #5
+    'Todays Visitors Attribute\\Value', #6
+    'Todays Visitors Attribute\\Date changed', #7
+    'Addresses\\Address line 1', #8
+    'Addresses\\Address line 2', #9
+    'Addresses\\City', #10
+    'Addresses\\ZIP', #11
+    'Addresses\\State abbreviation', #12
+    'Addresses\\Country abbreviation', #13
+    'Phones\\Number', #14
+    'Phones\\Date changed' #15
+]
+
+fields_to_data = {
+    "Email Address": csv_file_headers[4],
+    "First Name": csv_file_headers[0],
+    "Last Name": csv_file_headers[1],
+    "Full address": csv_file_headers[8] + " " + csv_file_headers[9] + " " + csv_file_headers[10] + " " + csv_file_headers[12] + " " + csv_file_headers[11] + " " + csv_file_headers[13],
+    "Phone Number": csv_file_headers[14],
+    "Country": csv_file_headers[13],
+    "State abreviation": csv_file_headers[12],
+    "ZIP code": csv_file_headers[11],
+    "System record ID": csv_file_headers[2],
+    "Date changed": csv_file_headers[3],
+    "Email change timestamp": csv_file_headers[5],
+    "Today visitors attribute": csv_file_headers[6],
+    "Today visitors Attribute change timestamp": csv_file_headers[7],
+    "Phone change timestamp": csv_file_headers[15],
+}
 
 def get_merge_fields_names():
     merge_fields = client.lists.get_list_merge_fields(LIST_ID)
@@ -35,17 +91,20 @@ def upload_csv(request):
         email_header = "Email Address"
         for row in csv_reader:
             email = row.get(email_header)
-            merge_fields = {}
-            # For each row, extract the necessary fields (e.g. email, first name, last name)
-            for header in headers:
-                merge_fields[header] = row.get(header)
+            # merge_fields = {}
+            # # For each row, extract the necessary fields (e.g. email, first name, last name)
+            # for header in headers:
+            #     merge_fields[header] = row.get(header)
             try:
                 response = client.lists.add_list_member(
                     LIST_ID,
                     {
                         "email_address": email,
                         "status": "subscribed",
-                        "merge_fields": merge_fields
+                        "merge_fields": {
+                            "FNAME": row.get("First Name"),
+                            "LNAME": row.get("Last Name")
+                        }
                     }
                 )
             except ApiClientError as e:
@@ -54,6 +113,7 @@ def upload_csv(request):
                 return redirect('upload_error')
         return redirect('success')
     else:
+        print(get_merge_fields_names())
         form = UploadNewFileForm()
     return render(request, 'upload.html', {'form': form})
 

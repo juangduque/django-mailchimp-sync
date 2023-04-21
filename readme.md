@@ -72,3 +72,5 @@ def create_new_list():
 }
 
 [{'email_address': 'jturner@socialgoodsoftware.com', 'merge_fields': {'FNAME': '', 'LNAME': '', 'ADDRESS': '', 'PHONE': '', 'BIRTHDAY': '', 'MMERGE6': '', 'MMERGE7': '', 'MMERGE8': '', 'MMERGE9': '', 'MMERGE10': '', 'MMERGE11': '', 'MMERGE12': '', 'MMERGE13': '', 'MMERGE14': '', 'MMERGE15': '', 'MMERGE16': ''}}]
+
+[('Address', 'ADDRESS'), ('Birthday', 'BIRTHDAY'), ('First Name', 'FNAME'), ('Last Name', 'LNAME'), ('System record ID', 'MMERGE10'), ('Date changed', 'MMERGE11'), ('Email change timestamp', 'MMERGE12'), ('Today visitors attribute', 'MMERGE13'), ('Today visitors Attribute change timestamp', 'MMERGE14'), ('Full address', 'MMERGE15')]
