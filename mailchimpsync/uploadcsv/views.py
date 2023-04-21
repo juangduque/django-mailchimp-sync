@@ -38,7 +38,8 @@ def upload_csv(request):
         for row in csv_reader:
             email = row.get(email_header)
             merge_fields = map_csv_row_to_merge_fields(row)
-            if DEBUG:
+            # Log the merge fields of the contact to be added
+            if DEBUG: 
                 print("merge_fields: ", user_sync_counter)
                 print(json.dumps(merge_fields, indent=4, sort_keys=True))
             # Check if the member is already subscribed
