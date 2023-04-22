@@ -254,6 +254,19 @@ The health of the connection is good but mailchimp prevents us from continuing t
 An error occurred when checking the existence of contact: {"type":"https://mailchimp.com/developer/marketing/docs/errors/","title":"Resource Not Found","status":404,"detail":"The requested resource could not be found.","instance":"523ddb0e-b9c6-6ebc-a6a2-b69ef91861ce"}
 ```
 
+###### Key revoked
+The error message indicates that the API key being used has been disabled. This could be due to various reasons, such as:
+
+1. The API key has been revoked or invalidated by the user who owns it.
+2. The API key was not generated with the proper permissions to perform the requested operation.
+3. The API key has been disabled by Mailchimp due to a violation of their terms of service or other policy.
+To resolve the issue, you can try the following:
+
+Double-check that you are using the correct API key. Make sure that you have copied and pasted it correctly, and that it is not expired or revoked ([Read more](https://mailchimp.com/es/help/about-api-keys/)).
+```
+An exception occurred: {"type":"https://mailchimp.com/developer/marketing/docs/errors/","title":"API Key Invalid","status":401,"detail":"API key has been disabled","instance":"802fd30d-9ef1-eaae-3cd5-b779f8aee541"}
+```
+
 ### My contribution
 This project is licensed by [MIT](https://opensource.org/license/mit/). you can copy it, modify it and use it as you wish as long as its purpose is not malicious.
 
