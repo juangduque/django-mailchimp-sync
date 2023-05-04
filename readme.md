@@ -2,6 +2,9 @@
 
 This is an application to sync your contacts with a csv file as input. Additionally you can also download your contact in .csv format too. This synchronization only works with the fields contained in the csv file passed as [input data](https://docs.google.com/spreadsheets/d/1Zg9C68SxuiZjzsj_Ym5Qh_G-FepfHTfCK0bKyMWLseA/edit#gid=566210249) due to limitations discussed later. I recommend using the files that exist in the csv_loader_files folder. One is the entire file, the other is a slice of this used for test.
 
+### Video demo
+click in the following [link](https://www.loom.com/share/e0f58565207a4eacbf9418c9018179da) to see a video demo of the application.
+
 ### About the project
 The application was made in Django (Python) and Bootstrap with some dinamic properties in the html templates.
 
